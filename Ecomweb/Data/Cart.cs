@@ -1,6 +1,7 @@
+namespace Ecomweb.Data;
 public class Cart
 {
     public int Id { get; set; }
-    public int Quantity { get; set; }
-    public List<Product> Products { get; set; } = new List<Product>();
+    public long UserId { get; set; }
+    public ICollection<CartItem> CartItems = new List<CartItem>();
 }
