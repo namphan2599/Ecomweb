@@ -11,6 +11,8 @@ builder.Services.AddDbContext<EcomContext>(
     opt => opt.UseSqlite(builder.Configuration.GetConnectionString("EcomContextSqLite"))
 );
 
+
+
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

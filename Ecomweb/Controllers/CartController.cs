@@ -40,6 +40,13 @@ namespace ecomweb
                 return NotFound();
             }
 
+            Console.WriteLine("no print {0}", cart.CartItems.Count);
+
+            foreach (var item in cart.CartItems)
+            {
+                Console.WriteLine(item.ProductId);
+            }
+
             return cart;
         }
 
@@ -90,27 +97,22 @@ namespace ecomweb
         [HttpPost("/AddToCart")]
         public async void AddToCart(AddToCartDto addToCartDto)
         {
-            if (addToCartDto.CartId is null)
+
+            var cart = await _context.Carts.FindAsync((long)addToCartDto.CartId) ?? new Cart
             {
-                Console.WriteLine("Create new Cart here");
+                UserId = addToCartDto.UserId
+            };
 
-                var newCart = new Cart
-                {
-                    UserId = addToCartDto.UserId
-                };
+            var newCartItem = new CartItem
+            {
+                ProductId = addToCartDto.ProductId,
 
-                var newCartItem = new CartItem
-                {
-                    ProductId = addToCartDto.ProductId,
+                Quantity = addToCartDto.Quantity
+            };
 
-                    Quantity = addToCartDto.Quantity
-                };
+            cart.CartItems.Add(newCartItem);
 
-                newCart.CartItems.Add(newCartItem);
-
-                await _context.SaveChangesAsync();
-
-            }
+            await _context.SaveChangesAsync();
         }
 
         // DELETE: api/Cart/5
