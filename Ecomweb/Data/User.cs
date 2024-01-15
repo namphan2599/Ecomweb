@@ -4,7 +4,7 @@ namespace Ecomweb.Data;
 
 public class User
 {
-  public long Id { get; set; }
+  public int Id { get; set; }
   public string Username { get; set; } = null!;
 
   [JsonIgnore]

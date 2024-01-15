@@ -33,7 +33,25 @@ namespace ecomweb
         [HttpGet("{id}")]
         public async Task<ActionResult<Cart>> GetCart(int id)
         {
-            var cart = await _context.Carts.FindAsync(id);
+
+            /*
+                Query cart item join with product
+                must have some way to optimize this
+            */
+            // var query = from cartT in _context.Set<CartItem>()
+            //             join product in _context.Set<Product>()
+            //                 on cartT.ProductId equals product.Id
+            //             where cartT.CartId == id
+            //             select new { cartT, product.Name, product.Price };
+
+            // Console.WriteLine(query.ToList());
+
+            // foreach (var item in query.ToList())
+            // {
+            //     Console.WriteLine(item.Name);
+            // }
+
+            var cart = await _context.Carts.Include(cart => cart.CartItems).SingleAsync(cart => cart.Id == id);
 
             if (cart == null)
             {
@@ -98,19 +116,28 @@ namespace ecomweb
         public async void AddToCart(AddToCartDto addToCartDto)
         {
 
-            var cart = await _context.Carts.FindAsync((long)addToCartDto.CartId) ?? new Cart
+            var cart = await _context.Carts.FindAsync(addToCartDto.CartId) ?? new Cart
             {
                 UserId = addToCartDto.UserId
             };
 
-            var newCartItem = new CartItem
+            var cartItem = await _context.CartItems.SingleAsync(cartItem => cartItem.ProductId == addToCartDto.ProductId);
+
+            if (cartItem == null)
             {
-                ProductId = addToCartDto.ProductId,
+                cartItem = new CartItem
+                {
+                    ProductId = addToCartDto.ProductId,
 
-                Quantity = addToCartDto.Quantity
-            };
+                    Quantity = addToCartDto.Quantity
+                };
 
-            cart.CartItems.Add(newCartItem);
+                cart.CartItems.Add(cartItem);
+            }
+            else
+            {
+                cartItem.Quantity += addToCartDto.Quantity;
+            }
 
             await _context.SaveChangesAsync();
         }

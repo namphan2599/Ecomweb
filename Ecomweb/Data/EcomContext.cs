@@ -11,6 +11,11 @@ public class EcomContext : DbContext
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {
 
+    modelBuilder.Entity<Cart>()
+      .HasMany(e => e.CartItems)
+      .WithOne(e => e.Cart)
+      .HasForeignKey(e => e.CartId)
+      .IsRequired();
     base.OnModelCreating(modelBuilder);
   }
 
@@ -19,5 +24,7 @@ public class EcomContext : DbContext
   public DbSet<Cart> Carts { get; set; }
 
   public DbSet<User> Users { get; set; }
+
+  public DbSet<CartItem> CartItems { get; set; }
 }
 
