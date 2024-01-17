@@ -6,6 +6,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Ecomweb.Data;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace ecomweb
 {
@@ -14,10 +17,12 @@ namespace ecomweb
     public class UserController : ControllerBase
     {
         private readonly EcomContext _context;
+        private IConfiguration _config;
 
-        public UserController(EcomContext context)
+        public UserController(EcomContext context, IConfiguration config)
         {
             _context = context;
+            _config = config;
         }
 
         // GET: api/User
@@ -97,6 +102,37 @@ namespace ecomweb
             await _context.SaveChangesAsync();
 
             return NoContent();
+        }
+
+
+        [HttpPost("/Login")]
+        public async Task<IActionResult> Login(UserLoginDto userLoginDto)
+        {
+            Console.WriteLine("Do something cool");
+            IActionResult response = Unauthorized();
+            var user = await _context.Users.SingleAsync(user => user.Username == userLoginDto.Username);
+
+            if (user != null)
+            {
+                var tokenString = GenerateJwt(user);
+                response = Ok(new { token = tokenString });
+            }
+
+            return Ok("wut");
+        }
+
+        private string GenerateJwt(User user)
+        {
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+            var token = new JwtSecurityToken(_config["Jwt:Issuer"],
+              _config["Jwt:Issuer"],
+              null,
+              expires: DateTime.Now.AddMinutes(120),
+              signingCredentials: credentials);
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
         private bool UserExists(long id)

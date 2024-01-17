@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Ecomweb.Data;
 using System.Runtime.CompilerServices;
 using Ecomweb.Data.Dto;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ecomweb
 {
