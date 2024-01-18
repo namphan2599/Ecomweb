@@ -59,11 +59,11 @@ namespace ecomweb
                 return NotFound();
             }
 
-            Console.WriteLine("no print {0}", cart.CartItems.Count);
+            // Console.WriteLine("no print {0}", cart.CartItems.ToList().Tak);
 
             foreach (var item in cart.CartItems)
             {
-                Console.WriteLine(item.ProductId);
+                Console.WriteLine(item.Product.Name);
             }
 
             return cart;
@@ -122,14 +122,21 @@ namespace ecomweb
                 UserId = addToCartDto.UserId
             };
 
-            var cartItem = await _context.CartItems.SingleAsync(cartItem => cartItem.ProductId == addToCartDto.ProductId);
+            var cartItem = await _context.CartItems.SingleOrDefaultAsync(cartItem => cartItem.Product.Id == addToCartDto.ProductId);
+
+            var product = await _context.Products.FindAsync(addToCartDto.ProductId);
+
+            if (product == null)
+            {
+                Console.WriteLine("wtf");
+                return;
+            }
 
             if (cartItem == null)
             {
                 cartItem = new CartItem
                 {
-                    ProductId = addToCartDto.ProductId,
-
+                    Product = product,
                     Quantity = addToCartDto.Quantity
                 };
 
@@ -139,6 +146,7 @@ namespace ecomweb
             {
                 cartItem.Quantity += addToCartDto.Quantity;
             }
+            Console.WriteLine("wtf");
 
             await _context.SaveChangesAsync();
         }
