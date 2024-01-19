@@ -1,4 +1,6 @@
 
+using System.Text.Json.Serialization;
+
 namespace Ecomweb.Data;
 
 public class CartItem

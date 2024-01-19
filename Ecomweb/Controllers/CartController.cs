@@ -9,6 +9,7 @@ using Ecomweb.Data;
 using System.Runtime.CompilerServices;
 using Ecomweb.Data.Dto;
 using Microsoft.AspNetCore.Authorization;
+using System.Text.Json;
 
 namespace ecomweb
 {
@@ -52,7 +53,10 @@ namespace ecomweb
             //     Console.WriteLine(item.Name);
             // }
 
-            var cart = await _context.Carts.Include(cart => cart.CartItems).SingleAsync(cart => cart.Id == id);
+            var cart = await _context.Carts
+                        .Include(cart => cart.CartItems)
+                        .ThenInclude(cartItem => cartItem.Product)
+                        .SingleOrDefaultAsync(cart => cart.Id == id);
 
             if (cart == null)
             {
@@ -65,6 +69,9 @@ namespace ecomweb
             {
                 Console.WriteLine(item.Product.Name);
             }
+
+            string jsonCart = JsonSerializer.Serialize(cart);
+
 
             return cart;
         }
@@ -116,21 +123,29 @@ namespace ecomweb
         [HttpPost("/AddToCart")]
         public async void AddToCart(AddToCartDto addToCartDto)
         {
-
-            var cart = await _context.Carts.FindAsync(addToCartDto.CartId) ?? new Cart
-            {
-                UserId = addToCartDto.UserId
-            };
-
-            var cartItem = await _context.CartItems.SingleOrDefaultAsync(cartItem => cartItem.Product.Id == addToCartDto.ProductId);
-
+            // still a mess
             var product = await _context.Products.FindAsync(addToCartDto.ProductId);
 
             if (product == null)
             {
-                Console.WriteLine("wtf");
                 return;
             }
+
+            var cart = await _context.Carts
+                .Include(cart => cart.CartItems)
+                .ThenInclude(cartItem => cartItem.Product)
+                .FirstOrDefaultAsync(cart => cart.Id == addToCartDto.CartId);
+
+            if (cart == null)
+            {
+                cart = new Cart
+                {
+                    UserId = addToCartDto.UserId
+                };
+                await _context.Carts.AddAsync(cart);
+            }
+
+            var cartItem = cart.CartItems.FirstOrDefault(cart => cart.Product.Id == addToCartDto.ProductId);
 
             if (cartItem == null)
             {
@@ -146,7 +161,6 @@ namespace ecomweb
             {
                 cartItem.Quantity += addToCartDto.Quantity;
             }
-            Console.WriteLine("wtf");
 
             await _context.SaveChangesAsync();
         }
