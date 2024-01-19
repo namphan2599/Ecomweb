@@ -9,5 +9,8 @@ public class CartItem
   public int CartId { get; }
   public Product Product { get; set; }
   public int Quantity { get; set; }
+
+  // prevent the loop reference(for now)
+  [JsonIgnore]
   public Cart Cart { get; set; }
 }
