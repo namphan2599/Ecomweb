@@ -9,6 +9,8 @@ using Ecomweb.Data;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.IdentityModel.Tokens.Jwt;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace ecomweb
 {
@@ -104,35 +106,52 @@ namespace ecomweb
             return NoContent();
         }
 
-
-        [HttpPost("/Login")]
+        [HttpPost("login")]
+        [AllowAnonymous]
         public async Task<IActionResult> Login(UserLoginDto userLoginDto)
         {
-            Console.WriteLine("Do something cool");
             IActionResult response = Unauthorized();
+
             var user = await _context.Users.SingleAsync(user => user.Username == userLoginDto.Username);
 
             if (user != null)
             {
-                var tokenString = GenerateJwt(user);
-                response = Ok(new { token = tokenString });
+
+                var issuer = _config["Jwt:Issuer"];
+                var key = Encoding.UTF8.GetBytes(_config["Jwt:Key"]);
+
+                var tokenDescriptor = new SecurityTokenDescriptor
+                {
+                    Subject = new ClaimsIdentity(new[]
+                    {
+                        new Claim("Id", Guid.NewGuid().ToString()),
+                        new Claim(JwtRegisteredClaimNames.Sub, user.Username),
+                        new Claim(JwtRegisteredClaimNames.Jti,
+                        Guid.NewGuid().ToString())
+                    }),
+                    Expires = DateTime.UtcNow.AddMinutes(30),
+                    Issuer = issuer,
+                    SigningCredentials = new SigningCredentials
+                        (new SymmetricSecurityKey(key),
+                        SecurityAlgorithms.HmacSha256)
+                };
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var token = tokenHandler.CreateToken(tokenDescriptor);
+                var jwtToken = tokenHandler.WriteToken(token);
+                var stringToken = tokenHandler.WriteToken(token);
+
+                response = Ok(new { token = stringToken });
             }
 
-            return Ok("wut");
+            return response;
         }
 
-        private string GenerateJwt(User user)
+
+        [Authorize]
+        [HttpGet("secret")]
+        public string Test()
         {
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
-            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-
-            var token = new JwtSecurityToken(_config["Jwt:Issuer"],
-              _config["Jwt:Issuer"],
-              null,
-              expires: DateTime.Now.AddMinutes(120),
-              signingCredentials: credentials);
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            return "Hello world";
         }
 
         private bool UserExists(long id)
