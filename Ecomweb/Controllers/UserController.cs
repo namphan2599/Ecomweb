@@ -11,6 +11,7 @@ using System.Text;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using Ecomweb.Interfaces;
 
 namespace ecomweb
 {
@@ -21,10 +22,13 @@ namespace ecomweb
         private readonly EcomContext _context;
         private IConfiguration _config;
 
-        public UserController(EcomContext context, IConfiguration config)
+        private IMyDependency _test;
+
+        public UserController(EcomContext context, IConfiguration config, IMyDependency test)
         {
             _context = context;
             _config = config;
+            _test = test;
         }
 
         // GET: api/User
@@ -151,7 +155,7 @@ namespace ecomweb
         [HttpGet("secret")]
         public string Test()
         {
-            return "Hello world";
+            return _test.PrintText();
         }
 
         private bool UserExists(long id)

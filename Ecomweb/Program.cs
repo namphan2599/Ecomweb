@@ -1,6 +1,8 @@
 
 
 using Ecomweb.Data;
+using Ecomweb.Interfaces;
+using Ecomweb.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -15,6 +17,8 @@ builder.Logging.AddConsole();
 builder.Services.AddDbContext<EcomContext>(
     opt => opt.UseSqlite(builder.Configuration.GetConnectionString("EcomContextSqLite"))
 );
+
+builder.Services.AddScoped<IMyDependency, MyDependency>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
