@@ -19,6 +19,8 @@ builder.Services.AddDbContext<EcomContext>(
 );
 
 builder.Services.AddScoped<IMyDependency, MyDependency>();
+builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
+builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>

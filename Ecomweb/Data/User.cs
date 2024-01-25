@@ -8,6 +8,9 @@ public class User
   public string Username { get; set; } = null!;
 
   [JsonIgnore]
-  public string Password { get; set; } = null!;
+  public byte[] Password { get; set; } = Array.Empty<byte>();
+
+  [JsonIgnore]
+  public byte[] Salt { get; set; } = Array.Empty<byte>();
   public Cart? Cart { get; set; }
 }
