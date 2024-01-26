@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using Ecomweb.Interfaces;
 using Ecomweb.Data.Dto;
+using Ecomweb.Services;
 
 namespace ecomweb
 {
@@ -22,14 +23,14 @@ namespace ecomweb
     public class UserController : ControllerBase
     {
         private readonly EcomContext _context;
-        private IConfiguration _config;
+        private JwtGenerator _jwtGenerator;
 
         private IPasswordHasher _passwordHasher;
 
-        public UserController(EcomContext context, IConfiguration config, IPasswordHasher passwordHasher)
+        public UserController(EcomContext context, JwtGenerator jwtGenerator, IPasswordHasher passwordHasher)
         {
             _context = context;
-            _config = config;
+            _jwtGenerator = jwtGenerator;
             _passwordHasher = passwordHasher;
         }
 
@@ -151,30 +152,10 @@ namespace ecomweb
                 throw new BadHttpRequestException("Invalid Name / Password");
             }
 
-            var issuer = _config["Jwt:Issuer"];
-            var key = Encoding.UTF8.GetBytes(_config["Jwt:Key"]);
 
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(new[]
-                {
-                        new Claim("Id", Guid.NewGuid().ToString()),
-                        new Claim(JwtRegisteredClaimNames.Sub, user.Username),
-                        new Claim(JwtRegisteredClaimNames.Jti,
-                        Guid.NewGuid().ToString())
-                    }),
-                Expires = DateTime.UtcNow.AddDays(30),
-                Issuer = issuer,
-                SigningCredentials = new SigningCredentials
-                    (new SymmetricSecurityKey(key),
-                    SecurityAlgorithms.HmacSha256)
-            };
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            var jwtToken = tokenHandler.WriteToken(token);
-            var stringToken = tokenHandler.WriteToken(token);
+            var jwtToken = _jwtGenerator.GenToken(user);
 
-            return Ok(new { token = stringToken });
+            return Ok(new { token = jwtToken });
         }
 
         [HttpGet("secret")]
