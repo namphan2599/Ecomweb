@@ -13,7 +13,7 @@ namespace ecomweb
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    [Authorize(Roles = "admin")]
     public class ProductController : ControllerBase
     {
         private readonly EcomContext _context;

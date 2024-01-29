@@ -25,6 +25,7 @@ public class JwtGenerator
       Subject = new ClaimsIdentity(new[]
         {
                         new Claim("Id", Guid.NewGuid().ToString()),
+                        new Claim(ClaimTypes.Role, user.Role),
                         new Claim(JwtRegisteredClaimNames.Sub, user.Username),
                         new Claim(JwtRegisteredClaimNames.Jti,
                         Guid.NewGuid().ToString())

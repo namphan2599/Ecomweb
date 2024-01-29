@@ -129,6 +129,31 @@ namespace ecomweb
             return NoContent();
         }
 
+        [HttpPost("admin")]
+        [AllowAnonymous]
+        public async Task<ActionResult<User>> PostAdmin(UserCreateDto userCreateDto)
+        {
+            if (await _context.Users.Where(x => x.Username == userCreateDto.Username).AnyAsync())
+            {
+                throw new BadHttpRequestException("Name is in use");
+            }
+
+            var salt = Guid.NewGuid().ToByteArray();
+            var user = new User()
+            {
+                Username = userCreateDto.Username,
+                Role = "admin",
+                Password = await _passwordHasher.Hash(userCreateDto.Password, salt),
+                Salt = salt
+            };
+
+            _context.Users.Add(user);
+
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction("GetUser", new { id = user.Id }, user);
+        }
+
         [HttpPost("login")]
         [AllowAnonymous]
         public async Task<IActionResult> Login(UserLoginDto userLoginDto)
