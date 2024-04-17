@@ -1,12 +1,12 @@
 using System.Security.Claims;
 using Ecomweb.Interfaces;
 namespace Ecomweb.Services;
-public class MyDependency : IMyDependency
+public class CurrentUserAccessor : ICurrentUserAccessor
 {
 
   private readonly IHttpContextAccessor _httpContextAccessor;
 
-  public MyDependency(IHttpContextAccessor httpContextAccessor)
+  public CurrentUserAccessor(IHttpContextAccessor httpContextAccessor)
   {
     _httpContextAccessor = httpContextAccessor;
   }

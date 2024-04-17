@@ -18,7 +18,7 @@ builder.Services.AddDbContext<EcomContext>(
     opt => opt.UseSqlite(builder.Configuration.GetConnectionString("EcomContextSqLite"))
 );
 
-builder.Services.AddScoped<IMyDependency, MyDependency>();
+builder.Services.AddScoped<ICurrentUserAccessor, CurrentUserAccessor>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<JwtGenerator>();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
