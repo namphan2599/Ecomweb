@@ -44,15 +44,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy(name: "FreeApi",
-                      policy =>
-                      {
-                          policy.AllowAnyOrigin();
-                          policy.AllowAnyHeader();
-                      });
-});
+builder.Services.AddCors();
 
 var app = builder.Build();
 
@@ -66,7 +58,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseCors("FreeApi");
+app.UseCors(x => x.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
 
 app.UseHttpsRedirection();
 
