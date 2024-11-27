@@ -121,14 +121,20 @@ namespace ecomweb
         }
 
         [HttpPost("/AddToCart")]
-        public async void AddToCart(AddToCartDto addToCartDto)
+        public async Task<ActionResult<Cart>> AddToCart(AddToCartDto addToCartDto)
         {
+
+            if (addToCartDto.Quantity <= 0)
+            {
+                return BadRequest();
+            }
+
             // still a mess
             var product = await _context.Products.FindAsync(addToCartDto.ProductId);
 
             if (product == null)
             {
-                return;
+                return NotFound();
             }
 
             var cart = await _context.Carts
@@ -163,6 +169,8 @@ namespace ecomweb
             }
 
             await _context.SaveChangesAsync();
+
+            return Ok(cart);
         }
 
         // DELETE: api/Cart/5
