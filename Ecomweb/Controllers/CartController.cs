@@ -28,7 +28,10 @@ namespace ecomweb
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Cart>>> GetCart()
         {
-            return await _context.Carts.ToListAsync();
+            return await _context.Carts
+                .Include(cart => cart.CartItems)
+                .ThenInclude(cartItem => cartItem.Product)
+                .ToListAsync();
         }
 
         // GET: api/Cart/5

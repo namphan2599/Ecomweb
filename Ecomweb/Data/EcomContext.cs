@@ -11,11 +11,20 @@ public class EcomContext : DbContext
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {
 
-    modelBuilder.Entity<Cart>()
+        var jsonString = File.ReadAllBytes("MOCK_DATA.json");
+        var products = System.Text.Json.JsonSerializer.Deserialize<List<Product>>(jsonString);
+
+        Console.WriteLine(products);
+
+        modelBuilder.Entity<Product>().HasData(products);
+
+        modelBuilder.Entity<Cart>()
       .HasMany(e => e.CartItems)
       .WithOne(e => e.Cart)
       .HasForeignKey(e => e.CartId)
       .IsRequired();
+
+    
     base.OnModelCreating(modelBuilder);
   }
 

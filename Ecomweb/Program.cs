@@ -15,7 +15,9 @@ builder.Logging.AddConsole();
 // Add services to the container.
 
 builder.Services.AddDbContext<EcomContext>(
-    opt => opt.UseSqlite(builder.Configuration.GetConnectionString("EcomContextSqLite"))
+    opt => opt
+            .UseSqlite(builder.Configuration.GetConnectionString("EcomContextSqLite"))
+            
 );
 
 builder.Services.AddScoped<ICurrentUserAccessor, CurrentUserAccessor>();
