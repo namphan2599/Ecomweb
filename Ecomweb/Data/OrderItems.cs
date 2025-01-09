@@ -1,10 +1,12 @@
-using System.Text.Json.Serialization;
+﻿using Ecomweb.Data;
 
-namespace Ecomweb.Data;
-public class Cart
+namespace ecomweb.Data;
+
+public class OrderItems
 {
     public int Id { get; set; }
-    public int UserId { get; set; }
+
+    public int OrderId { get; set; }
 
     public int ProductId { get; set; }
 
@@ -13,4 +15,6 @@ public class Cart
     public DateTime AddedAt { get; set; }
 
     public Product Product { get; set; } = null!;
+
+    public double PriceAtTime { get; set; }
 }

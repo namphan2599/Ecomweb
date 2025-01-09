@@ -1,3 +1,4 @@
+using ecomweb.Data;
 using Microsoft.EntityFrameworkCore;
 namespace Ecomweb.Data;
 
@@ -11,19 +12,42 @@ public class EcomContext : DbContext
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {
 
-        var jsonString = File.ReadAllBytes("MOCK_DATA.json");
-        var products = System.Text.Json.JsonSerializer.Deserialize<List<Product>>(jsonString);
+        //var jsonString = File.ReadAllBytes("MOCK_DATA.json");
+        //var products = System.Text.Json.JsonSerializer.Deserialize<List<Product>>(jsonString);
 
-        Console.WriteLine(products);
+        //Console.WriteLine(products);
 
-        modelBuilder.Entity<Product>().HasData(products);
+        //modelBuilder.Entity<Product>().HasData(products);
+
+        modelBuilder.Entity<User>()
+            .HasMany(e => e.Carts)
+            .WithOne()
+            .HasForeignKey(e => e.UserId)
+            .IsRequired();
+
+        modelBuilder.Entity<User>()
+            .HasMany(e => e.Orders)
+            .WithOne()
+            .HasForeignKey(e => e.UserId)
+            .IsRequired();
 
         modelBuilder.Entity<Cart>()
-      .HasMany(e => e.CartItems)
-      .WithOne(e => e.Cart)
-      .HasForeignKey(e => e.CartId)
-      .IsRequired();
+            .HasOne(e => e.Product)
+            .WithMany()
+            .HasForeignKey(e => e.ProductId)
+            .IsRequired();
 
+        modelBuilder.Entity<Order>()
+            .HasMany(e => e.OrderItems)
+            .WithOne()
+            .HasForeignKey(e => e.OrderId)
+            .IsRequired();
+
+        modelBuilder.Entity<OrderItems>()
+            .HasOne(e => e.Product)
+            .WithMany()
+            .HasForeignKey(e => e.ProductId)
+            .IsRequired();
     
     base.OnModelCreating(modelBuilder);
   }
@@ -34,6 +58,5 @@ public class EcomContext : DbContext
 
   public DbSet<User> Users { get; set; }
 
-  public DbSet<CartItem> CartItems { get; set; }
 }
 
