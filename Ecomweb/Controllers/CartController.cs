@@ -29,8 +29,7 @@ namespace ecomweb
         public async Task<ActionResult<IEnumerable<Cart>>> GetCart()
         {
             return await _context.Carts
-                .Include(cart => cart.CartItems)
-                .ThenInclude(cartItem => cartItem.Product)
+                .Include(cart => cart.Product)
                 .ToListAsync();
         }
 
@@ -57,8 +56,7 @@ namespace ecomweb
             // }
 
             var cart = await _context.Carts
-                        .Include(cart => cart.CartItems)
-                        .ThenInclude(cartItem => cartItem.Product)
+                        .Include(cart => cart.Product)
                         .SingleOrDefaultAsync(cart => cart.Id == id);
 
             if (cart == null)
@@ -68,10 +66,8 @@ namespace ecomweb
 
             // Console.WriteLine("no print {0}", cart.CartItems.ToList().Tak);
 
-            foreach (var item in cart.CartItems)
-            {
-                Console.WriteLine(item.Product.Name);
-            }
+            Console.WriteLine(cart.Product.Name);
+            
 
             string jsonCart = JsonSerializer.Serialize(cart);
 
@@ -132,7 +128,7 @@ namespace ecomweb
                 return BadRequest();
             }
 
-            // still a mess
+            
             var product = await _context.Products.FindAsync(addToCartDto.ProductId);
 
             if (product == null)
@@ -141,34 +137,30 @@ namespace ecomweb
             }
 
             var cart = await _context.Carts
-                .Include(cart => cart.CartItems)
-                .ThenInclude(cartItem => cartItem.Product)
+                .Include(cart => cart.Product)
                 .FirstOrDefaultAsync(cart => cart.Id == addToCartDto.CartId);
 
+            // still a mess
             if (cart == null)
             {
                 cart = new Cart
                 {
-                    UserId = addToCartDto.UserId
+                    UserId = addToCartDto.UserId,
+                    Product = product,
+                    ProductId = product.Id,
+                    Quantity = addToCartDto.Quantity,
                 };
                 await _context.Carts.AddAsync(cart);
-            }
-
-            var cartItem = cart.CartItems.FirstOrDefault(cart => cart.Product.Id == addToCartDto.ProductId);
-
-            if (cartItem == null)
+            } else
             {
-                cartItem = new CartItem
+                if(cart.Product.Id == addToCartDto.ProductId)
                 {
-                    Product = product,
-                    Quantity = addToCartDto.Quantity
-                };
-
-                cart.CartItems.Add(cartItem);
-            }
-            else
-            {
-                cartItem.Quantity += addToCartDto.Quantity;
+                    // update quantity if product already in cart
+                    cart.Quantity += addToCartDto.Quantity;
+                } else
+                {
+                    return BadRequest();
+                }
             }
 
             await _context.SaveChangesAsync();
