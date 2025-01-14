@@ -17,6 +17,10 @@ public class User
     public string LastName { get; set; } = null!;
 
     [JsonIgnore]
+    [DefaultValue("user")]
+    public string Role { get; set; } = "";
+
+    [JsonIgnore]
     public byte[] PasswordHash { get; set; } = Array.Empty<byte>();
 
     [JsonIgnore]

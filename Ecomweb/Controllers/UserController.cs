@@ -102,7 +102,7 @@ namespace ecomweb
             var user = new User()
             {
                 Username = userCreateDto.Username,
-                Password = await _passwordHasher.Hash(userCreateDto.Password, salt),
+                PasswordHash = await _passwordHasher.Hash(userCreateDto.Password, salt),
                 Salt = salt
             };
 
@@ -143,7 +143,7 @@ namespace ecomweb
             {
                 Username = userCreateDto.Username,
                 Role = "admin",
-                Password = await _passwordHasher.Hash(userCreateDto.Password, salt),
+                PasswordHash = await _passwordHasher.Hash(userCreateDto.Password, salt),
                 Salt = salt
             };
 

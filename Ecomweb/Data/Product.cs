@@ -15,7 +15,7 @@ public class Product
 
     public bool IsActive { get; set; }
 
-    public Categories Category { get; set; } = null!;
+    public Category Category { get; set; } = null!;
 
 }
 
