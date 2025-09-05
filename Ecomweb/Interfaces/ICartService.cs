@@ -5,7 +5,7 @@ namespace Ecomweb.Interfaces;
 
 public interface ICartService
 {
-  Task<ActionResult<CartItem>> AddToCart(AddToCartDto dto);
+  Task<ActionResult<Cart>> AddToCart(AddToCartDto dto);
   Task<ActionResult> RemoveFromCart(int cartItemId);
   Task<Cart> GetUserCart();
   Task<ActionResult> UpdateCartItemQuantity(int cartItemId, int newQuantity);

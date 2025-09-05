@@ -103,7 +103,8 @@ namespace ecomweb
             {
                 Username = userCreateDto.Username,
                 PasswordHash = await _passwordHasher.Hash(userCreateDto.Password, salt),
-                Salt = salt
+                Salt = salt,
+                Email = userCreateDto.Email,
             };
 
             _context.Users.Add(user);
@@ -144,7 +145,8 @@ namespace ecomweb
                 Username = userCreateDto.Username,
                 Role = "admin",
                 PasswordHash = await _passwordHasher.Hash(userCreateDto.Password, salt),
-                Salt = salt
+                Salt = salt,
+                Email = userCreateDto.Email,
             };
 
             _context.Users.Add(user);
@@ -170,7 +172,7 @@ namespace ecomweb
             }
 
             if (
-                !user.Password.SequenceEqual(
+                !user.PasswordHash.SequenceEqual(
                     await _passwordHasher.Hash(userLoginDto.Password, user.Salt))
             )
             {
@@ -186,7 +188,7 @@ namespace ecomweb
         [HttpGet("secret")]
         public string Test()
         {
-            return "?";
+            return "Authenticated";
         }
 
         private bool UserExists(long id)

@@ -12,7 +12,7 @@ public class Category
 
     public int ParentId { get; set; }
 
-    public Category? Parent { get; set; }
+    //public Category? Parent { get; set; }
 
-    public ICollection<Product> Products { get; set; } = new List<Product>();
+    //public ICollection<Product> Products { get; set; } = new List<Product>();
 }
