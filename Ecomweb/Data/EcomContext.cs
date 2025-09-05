@@ -49,7 +49,7 @@ public class EcomContext : DbContext
             .HasForeignKey(e => e.ProductId)
             .IsRequired();
     
-    base.OnModelCreating(modelBuilder);
+        base.OnModelCreating(modelBuilder);
   }
 
   public DbSet<Product> Products { get; set; } = null!;
