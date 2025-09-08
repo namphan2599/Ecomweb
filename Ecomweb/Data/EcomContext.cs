@@ -1,3 +1,4 @@
+using Bogus;
 using ecomweb.Data;
 using Microsoft.EntityFrameworkCore;
 namespace Ecomweb.Data;
@@ -19,6 +20,10 @@ public class EcomContext : DbContext
 
         //modelBuilder.Entity<Product>().HasData(products);
 
+
+       
+
+
         modelBuilder.Entity<User>()
             .HasMany(e => e.Carts)
             .WithOne()
@@ -37,18 +42,6 @@ public class EcomContext : DbContext
             .HasForeignKey(e => e.ProductId)
             .IsRequired();
 
-        modelBuilder.Entity<Order>()
-            .HasMany(e => e.OrderItems)
-            .WithOne()
-            .HasForeignKey(e => e.OrderId)
-            .IsRequired();
-
-        modelBuilder.Entity<OrderItems>()
-            .HasOne(e => e.Product)
-            .WithMany()
-            .HasForeignKey(e => e.ProductId)
-            .IsRequired();
-    
         base.OnModelCreating(modelBuilder);
   }
 

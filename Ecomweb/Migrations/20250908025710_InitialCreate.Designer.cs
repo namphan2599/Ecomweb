@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ecomweb.Migrations
 {
     [DbContext(typeof(EcomContext))]
-    [Migration("20250905093823_InitialCreate")]
+    [Migration("20250908025710_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
