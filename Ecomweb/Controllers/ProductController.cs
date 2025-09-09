@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Ecomweb.Data;
 using Microsoft.AspNetCore.Authorization;
+using static System.Net.Mime.MediaTypeNames;
 
 
 namespace ecomweb
@@ -81,8 +82,28 @@ namespace ecomweb
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         [Authorize(Roles = "admin")]
-        public async Task<ActionResult<Product>> PostProduct(Product product)
+        public async Task<ActionResult<Product>> PostProduct([FromForm] Product product, IFormFile image)
         {
+            if (image != null && image.Length > 0)
+            {
+                var extension = Path.GetExtension(image.FileName);
+                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
+                if (!allowedExtensions.Contains(extension.ToLower()))
+                {
+                    return BadRequest("Invalid image format.");
+                }
+
+                var fileName = $"product_{Guid.NewGuid()}{extension}";
+                var imagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/products", fileName);
+
+                Directory.CreateDirectory(Path.GetDirectoryName(imagePath)!); // Ensure folder exists
+
+                using var stream = new FileStream(imagePath, FileMode.Create);
+                await image.CopyToAsync(stream);
+
+                product.ImageUrl = $"/images/products/{fileName}";
+            }
+
             _context.Products.Add(product);
             await _context.SaveChangesAsync();
 

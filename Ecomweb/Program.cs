@@ -55,7 +55,6 @@ var app = builder.Build();
 
 
 // For seeding initial data
-
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -78,6 +77,8 @@ app.UseAuthorization();
 app.UseCors(x => x.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
 
 app.UseHttpsRedirection();
+
+app.UseStaticFiles();
 
 app.MapControllers();
 

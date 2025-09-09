@@ -11,6 +11,8 @@ public class Product
 
     public int Quantity { get; set; }
 
+    public string ImageUrl { get; set; } = "/images/placeholder.jpg";
+
     public bool IsActive { get; set; }
 
     //public Category Category { get; set; } = null!;

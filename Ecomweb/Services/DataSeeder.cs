@@ -21,9 +21,10 @@ namespace ecomweb.Services
                    .RuleFor(product => product.Name, f => f.Commerce.Product())
                    .RuleFor(p => p.Description, f => f.Commerce.ProductDescription())
                    .RuleFor(p => p.Quantity, f => f.Random.Int(1, 100))
-                   .RuleFor(p => p.Price, f => f.Random.Decimal(10, 1000));
+                   .RuleFor(p => p.Price, f => f.Random.Decimal(10, 1000))
+                   .RuleFor(p => p.ImageUrl, f => $"/images/products/image_{f.Random.Int(1,3)}.jpg");
 
-                _context.Products.AddRange(productFaker.Generate(100));
+                _context.Products.AddRange(productFaker.Generate(50));
                 _context.SaveChanges();
             }
         }
