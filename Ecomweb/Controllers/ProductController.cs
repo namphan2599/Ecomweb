@@ -1,13 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Ecomweb.Data;
 using Microsoft.AspNetCore.Authorization;
-using static System.Net.Mime.MediaTypeNames;
+using ecomweb.Data.Dto;
 
 
 namespace ecomweb
@@ -26,9 +21,23 @@ namespace ecomweb
         // GET: api/Product
         [HttpGet]
         [AllowAnonymous]
-        public async Task<ActionResult<IEnumerable<Product>>> GetProducts()
+        public async Task<ActionResult<ProductsDto>> GetProducts(int page = 1, int pageSize = 10, string sort = "price-asc")
         {
-            return await _context.Products.ToListAsync();
+            IQueryable<Product> query = _context.Products;
+            query = sort switch
+            {
+                "price-asc" => query.OrderBy(p => p.Price),
+                "price-desc" => query.OrderByDescending(p => p.Price),
+                "name-asc" => query.OrderBy(p => p.Name),
+                "name-desc" => query.OrderByDescending(p => p.Name),
+                _ => query.OrderBy(p => p.Price),
+            };
+
+            query = query.Skip((page - 1) * pageSize).Take(pageSize);
+
+            var products = await query.ToListAsync();
+
+            return new ProductsDto() { Products = products, TotalCount = query.Count()};
         }
 
         // GET: api/Product/5
