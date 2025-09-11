@@ -55,14 +55,14 @@ var app = builder.Build();
 
 
 // For seeding initial data
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    var context = services.GetRequiredService<EcomContext>();
-    var seeder = services.GetRequiredService<DataSeeder>();
-    context.Database.EnsureCreated();
-    seeder.SeedProducts();
-}
+//using (var scope = app.Services.CreateScope())
+//{
+//    var services = scope.ServiceProvider;
+//    var context = services.GetRequiredService<EcomContext>();
+//    var seeder = services.GetRequiredService<DataSeeder>();
+//    context.Database.EnsureCreated();
+//    seeder.SeedProducts();
+//}
 
 app.UseAuthentication();
 app.UseAuthorization();

@@ -7,6 +7,8 @@ namespace ecomweb.Services
     {
         private readonly EcomContext _context;
 
+
+
         public DataSeeder(EcomContext context)
         {
             _context = context;
@@ -22,7 +24,7 @@ namespace ecomweb.Services
                    .RuleFor(p => p.Description, f => f.Commerce.ProductDescription())
                    .RuleFor(p => p.Quantity, f => f.Random.Int(1, 100))
                    .RuleFor(p => p.Price, f => f.Random.Decimal(10, 1000))
-                   .RuleFor(p => p.ImageUrl, f => $"/images/products/image_{f.Random.Int(1,3)}.jpg");
+                   .RuleFor(p => p.ImageUrl, f => $"https://localhost:7077/images/products/image_{f.Random.Int(1,3)}.jpg");
 
                 _context.Products.AddRange(productFaker.Generate(50));
                 _context.SaveChanges();

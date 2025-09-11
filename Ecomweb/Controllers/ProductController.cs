@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Authorization;
 using ecomweb.Data.Dto;
 
 
+
+
 namespace ecomweb
 {
     [Route("api/[controller]")]
@@ -12,6 +14,9 @@ namespace ecomweb
     public class ProductController : ControllerBase
     {
         private readonly EcomContext _context;
+
+        const string baseUrl = "https://localhost:7077";
+
 
         public ProductController(EcomContext context)
         {
@@ -23,7 +28,8 @@ namespace ecomweb
         [AllowAnonymous]
         public async Task<ActionResult<ProductsDto>> GetProducts(int page = 1, int pageSize = 10, string sort = "price-asc")
         {
-            IQueryable<Product> query = _context.Products;
+            IQueryable<Product> query = _context.Products.AsNoTracking();
+
             query = sort switch
             {
                 "price-asc" => query.OrderBy(p => p.Price),
@@ -33,11 +39,11 @@ namespace ecomweb
                 _ => query.OrderBy(p => p.Price),
             };
 
-            query = query.Skip((page - 1) * pageSize).Take(pageSize);
+            
 
-            var products = await query.ToListAsync();
+            var products = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
 
-            return new ProductsDto() { Products = products, TotalCount = query.Count()};
+            return new ProductsDto() { Products = products, TotalCount = query.Count() };
         }
 
         // GET: api/Product/5
@@ -110,7 +116,7 @@ namespace ecomweb
                 using var stream = new FileStream(imagePath, FileMode.Create);
                 await image.CopyToAsync(stream);
 
-                product.ImageUrl = $"/images/products/{fileName}";
+                product.ImageUrl = $"{baseUrl}/images/products/{fileName}";
             }
 
             _context.Products.Add(product);
