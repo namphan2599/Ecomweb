@@ -10,6 +10,7 @@ using System.Runtime.CompilerServices;
 using Ecomweb.Data.Dto;
 using Microsoft.AspNetCore.Authorization;
 using System.Text.Json;
+using ecomweb.Data.Dto;
 
 namespace ecomweb
 {
@@ -25,101 +26,45 @@ namespace ecomweb
         }
 
         // GET: api/Cart
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Cart>>> GetCart()
+        [HttpGet("{userId}")]
+        [Authorize]
+        public async Task<ActionResult<IEnumerable<Cart>>> GetCart(int userId)
         {
             return await _context.Carts
                 .Include(cart => cart.Product)
+                .Where(cart => cart.UserId == userId)
                 .ToListAsync();
         }
 
-        // GET: api/Cart/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Cart>> GetCart(int id)
+
+        // PUT: api/Cart/5
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPut("{id}")]
+        [Authorize]
+        public async Task<IActionResult> PutCart(int id, UpdateCartDto updateCartDto)
         {
-
-            /*
-                Query cart item join with product
-                must have some way to optimize this
-            */
-            // var query = from cartT in _context.Set<CartItem>()
-            //             join product in _context.Set<Product>()
-            //                 on cartT.ProductId equals product.Id
-            //             where cartT.CartId == id
-            //             select new { cartT, product.Name, product.Price };
-
-            // Console.WriteLine(query.ToList());
-
-            // foreach (var item in query.ToList())
-            // {
-            //     Console.WriteLine(item.Name);
-            // }
-
-            var cart = await _context.Carts
-                        .Include(cart => cart.Product)
-                        .SingleOrDefaultAsync(cart => cart.Id == id);
+            var cart = await _context.Carts.FindAsync(id);
 
             if (cart == null)
             {
                 return NotFound();
             }
 
-            // Console.WriteLine("no print {0}", cart.CartItems.ToList().Tak);
-
-            Console.WriteLine(cart.Product.Name);
-            
-
-            string jsonCart = JsonSerializer.Serialize(cart);
-
-
-            return cart;
-        }
-
-        // PUT: api/Cart/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutCart(int id, Cart cart)
-        {
-            if (id != cart.Id)
+            if (updateCartDto.Quantity <= 0)
             {
                 return BadRequest();
             }
 
+            cart.Quantity = updateCartDto.Quantity;
+
             _context.Entry(cart).State = EntityState.Modified;
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!CartExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            return Ok(cart);
         }
 
-        // POST: api/Cart
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<Cart>> PostCart(string productId, Cart cart)
-        {
-            var product = _context.Products.FindAsync();
-            Console.WriteLine(productId);
-            _context.Carts.Add(cart);
-            await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetCart", new { id = cart.Id }, cart);
-        }
-
-        [HttpPost("/AddToCart")]
+        [HttpPost("AddToCart")]
+        [Authorize]
         public async Task<ActionResult<Cart>> AddToCart(AddToCartDto addToCartDto)
         {
 
@@ -138,6 +83,8 @@ namespace ecomweb
 
             var cart = await _context.Carts
                 .Include(cart => cart.Product)
+                .Where(cart => cart.ProductId == addToCartDto.ProductId)
+                .Where(cart => cart.UserId == addToCartDto.UserId)
                 .FirstOrDefaultAsync(cart => cart.Id == addToCartDto.CartId);
 
             // still a mess
@@ -151,17 +98,9 @@ namespace ecomweb
                     Quantity = addToCartDto.Quantity,
                 };
                 await _context.Carts.AddAsync(cart);
-            } else
-            {
-                if(cart.Product.Id == addToCartDto.ProductId)
-                {
-                    // update quantity if product already in cart
-                    cart.Quantity += addToCartDto.Quantity;
-                } else
-                {
-                    return BadRequest();
-                }
             }
+            
+            cart.Quantity += addToCartDto.Quantity;
 
             await _context.SaveChangesAsync();
 
@@ -170,6 +109,7 @@ namespace ecomweb
 
         // DELETE: api/Cart/5
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteCart(int id)
         {
             var cart = await _context.Carts.FindAsync(id);
