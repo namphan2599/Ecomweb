@@ -59,6 +59,8 @@ namespace ecomweb
 
             _context.Entry(cart).State = EntityState.Modified;
 
+            await _context.SaveChangesAsync();
+
             return Ok(cart);
         }
 
@@ -82,13 +84,14 @@ namespace ecomweb
             }
 
             var cart = await _context.Carts
-                .Include(cart => cart.Product)
-                .Where(cart => cart.ProductId == addToCartDto.ProductId)
-                .Where(cart => cart.UserId == addToCartDto.UserId)
-                .FirstOrDefaultAsync(cart => cart.Id == addToCartDto.CartId);
+                    .Include(cart => cart.Product)
+                    .FirstOrDefaultAsync(cart => cart.Id == addToCartDto.CartId);
 
-            // still a mess
-            if (cart == null)
+            if(cart != null)
+            {
+                cart.Quantity += addToCartDto.Quantity;
+            }
+            else
             {
                 cart = new Cart
                 {
@@ -99,8 +102,6 @@ namespace ecomweb
                 };
                 await _context.Carts.AddAsync(cart);
             }
-            
-            cart.Quantity += addToCartDto.Quantity;
 
             await _context.SaveChangesAsync();
 
@@ -121,7 +122,7 @@ namespace ecomweb
             _context.Carts.Remove(cart);
             await _context.SaveChangesAsync();
 
-            return NoContent();
+            return Ok(cart);
         }
 
         private bool CartExists(int id)
