@@ -24,7 +24,8 @@ public class JwtGenerator
     {
       Subject = new ClaimsIdentity(new[]
         {
-          new Claim("Id", Guid.NewGuid().ToString()),
+          new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+          new Claim(ClaimTypes.Name, user.Username),
           new Claim(ClaimTypes.Role, user.Role),
           new Claim(JwtRegisteredClaimNames.Sub, user.Username),
           new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
@@ -35,6 +36,7 @@ public class JwtGenerator
               (new SymmetricSecurityKey(key),
               SecurityAlgorithms.HmacSha256)
     };
+
     var tokenHandler = new JwtSecurityTokenHandler();
     var token = tokenHandler.CreateToken(tokenDescriptor);
     var jwtToken = tokenHandler.WriteToken(token);

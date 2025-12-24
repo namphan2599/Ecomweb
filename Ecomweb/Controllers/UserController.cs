@@ -186,7 +186,21 @@ namespace ecomweb
 
             var jwtToken = _jwtGenerator.GenToken(user);
 
-            return Ok(new { token = jwtToken });
+            return Ok(new { 
+                token = jwtToken,
+                user,
+            });
+        }
+
+        [HttpGet("me")]
+        [Authorize]
+        public IActionResult GetCurrentUser()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var username = User.FindFirst(ClaimTypes.Name)?.Value;
+            var role = User.FindFirst(ClaimTypes.Role)?.Value;
+
+            return Ok(new { userId, username, role });
         }
 
         [HttpGet("secret")]
