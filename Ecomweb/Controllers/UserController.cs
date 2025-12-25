@@ -197,10 +197,10 @@ namespace ecomweb
         public IActionResult GetCurrentUser()
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var username = User.FindFirst(ClaimTypes.Name)?.Value;
+            var name = User.FindFirst(ClaimTypes.Name)?.Value;
             var role = User.FindFirst(ClaimTypes.Role)?.Value;
 
-            return Ok(new { userId, username, role });
+            return Ok(new { userId, name, role });
         }
 
         [HttpGet("secret")]
