@@ -6,9 +6,6 @@ namespace ecomweb.Services
     public class DataSeeder
     {
         private readonly EcomContext _context;
-
-
-
         public DataSeeder(EcomContext context)
         {
             _context = context;

@@ -23,14 +23,12 @@ namespace ecomweb
     public class UserController : ControllerBase
     {
         private readonly EcomContext _context;
-        private JwtGenerator _jwtGenerator;
 
         private IPasswordHasher _passwordHasher;
 
-        public UserController(EcomContext context, JwtGenerator jwtGenerator, IPasswordHasher passwordHasher)
+        public UserController(EcomContext context, IPasswordHasher passwordHasher)
         {
             _context = context;
-            _jwtGenerator = jwtGenerator;
             _passwordHasher = passwordHasher;
         }
 
@@ -90,10 +88,10 @@ namespace ecomweb
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         [AllowAnonymous]
-        public async Task<ActionResult<User>> PostUser(UserCreateDto userCreateDto)
+        public async Task<ActionResult<User>> CreateUser(UserCreateDto userCreateDto)
         {
 
-            if (await _context.Users.Where(x => x.Username == userCreateDto.Username).AnyAsync())
+            if (await _context.Users.Where(x => x.Name == userCreateDto.Username).AnyAsync())
             {
                 throw new BadHttpRequestException("Name is in use");
             }
@@ -101,12 +99,10 @@ namespace ecomweb
             var salt = Guid.NewGuid().ToByteArray();
             var user = new User()
             {
-                Username = userCreateDto.Username,
+                Name = userCreateDto.Username,
                 PasswordHash = await _passwordHasher.Hash(userCreateDto.Password, salt),
                 Salt = salt,
                 Email = userCreateDto.Email,
-                FirstName = userCreateDto.FirstName,
-                LastName = userCreateDto.LastName,
             };
 
             _context.Users.Add(user);
@@ -136,7 +132,7 @@ namespace ecomweb
         [AllowAnonymous]
         public async Task<ActionResult<User>> PostAdmin(UserCreateDto userCreateDto)
         {
-            if (await _context.Users.Where(x => x.Username == userCreateDto.Username).AnyAsync())
+            if (await _context.Users.Where(x => x.Name == userCreateDto.Username).AnyAsync())
             {
                 throw new BadHttpRequestException("Name is in use");
             }
@@ -144,13 +140,11 @@ namespace ecomweb
             var salt = Guid.NewGuid().ToByteArray();
             var user = new User()
             {
-                Username = userCreateDto.Username,
+                Name = userCreateDto.Username,
                 Role = "admin",
                 PasswordHash = await _passwordHasher.Hash(userCreateDto.Password, salt),
                 Salt = salt,
                 Email = userCreateDto.Email,
-                FirstName = userCreateDto.FirstName,
-                LastName = userCreateDto.LastName,
             };
 
             _context.Users.Add(user);
@@ -158,62 +152,6 @@ namespace ecomweb
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetUser", new { id = user.Id }, user);
-        }
-
-        [HttpPost("login")]
-        [AllowAnonymous]
-        public async Task<IActionResult> Login(UserLoginDto userLoginDto)
-        {
-            IActionResult response = Unauthorized();
-
-            var user = await _context.Users
-                        .Where(user => user.Username == userLoginDto.Username)
-                        .FirstOrDefaultAsync();
-
-            if (user == null)
-            {
-                throw new BadHttpRequestException("Invalid Name / Password");
-            }
-
-            if (
-                !user.PasswordHash.SequenceEqual(
-                    await _passwordHasher.Hash(userLoginDto.Password, user.Salt))
-            )
-            {
-                throw new BadHttpRequestException("Invalid Name / Password");
-            }
-
-
-            var jwtToken = _jwtGenerator.GenToken(user);
-
-            return Ok(new { 
-                token = jwtToken,
-                user,
-            });
-        }
-
-        [HttpGet("me")]
-        [Authorize]
-        public IActionResult GetCurrentUser()
-        {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var name = User.FindFirst(ClaimTypes.Name)?.Value;
-            var role = User.FindFirst(ClaimTypes.Role)?.Value;
-
-            return Ok(new { userId, name, role });
-        }
-
-        [HttpGet("secret")]
-        public string Test()
-        {
-            return "Authenticated";
-        }
-
-        [HttpGet("admin-test")]
-        [Authorize(Roles = "admin")]
-        public string AdminTest()
-        {
-            return "Admin Authenticated";
         }
 
         private bool UserExists(long id)

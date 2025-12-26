@@ -15,7 +15,7 @@ public class JwtGenerator
     _config = config;
   }
 
-  public string GenToken(User user)
+  public string GenerateToken(User user)
   {
     var issuer = _config["Jwt:Issuer"];
     var key = Encoding.UTF8.GetBytes(_config["Jwt:Key"]);
@@ -25,9 +25,9 @@ public class JwtGenerator
       Subject = new ClaimsIdentity(new[]
         {
           new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-          new Claim(ClaimTypes.Name, user.Username),
+          new Claim(ClaimTypes.Name, user.Name),
           new Claim(ClaimTypes.Role, user.Role),
-          new Claim(JwtRegisteredClaimNames.Sub, user.Username),
+          new Claim(JwtRegisteredClaimNames.Sub, user.Name),
           new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         }),
       Expires = DateTime.UtcNow.AddDays(30),
