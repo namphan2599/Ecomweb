@@ -63,11 +63,11 @@ namespace ecomweb.Controllers
         [Authorize]
         public IActionResult GetCurrentUser()
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var name = User.FindFirst(ClaimTypes.Name)?.Value;
             var role = User.FindFirst(ClaimTypes.Role)?.Value;
 
-            return Ok(new { userId, name, role });
+            return Ok(new { id, name, role });
         }
 
         [HttpGet("secret")]

@@ -65,7 +65,7 @@ namespace ecomweb
         }
 
 
-        [HttpPost("AddToCart")]
+        [HttpPost]
         [Authorize]
         public async Task<ActionResult<Cart>> AddToCart(AddToCartDto addToCartDto)
         {
@@ -97,7 +97,6 @@ namespace ecomweb
                 {
                     UserId = addToCartDto.UserId,
                     Product = product,
-                    ProductId = product.Id,
                     Quantity = addToCartDto.Quantity,
                 };
                 await _context.Carts.AddAsync(cart);
