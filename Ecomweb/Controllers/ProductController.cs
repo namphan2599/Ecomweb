@@ -26,9 +26,39 @@ namespace ecomweb
         // GET: api/Product
         [HttpGet]
         [AllowAnonymous]
-        public async Task<ActionResult<ProductsDto>> GetProducts(int page = 1, int pageSize = 10, string sort = "price-asc")
+        public async Task<ActionResult<ProductsDto>> GetProducts(
+            int page = 1, 
+            int pageSize = 10, 
+            string sort = "price-asc", 
+            string? search = null,
+            decimal? minPrice = null,
+            decimal? maxPrice = null)
         {
             IQueryable<Product> query = _context.Products.AsNoTracking();
+
+
+            // ADD SEARCH FILTER
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var searchLower = search.ToLower();
+                query = query.Where(p =>
+                    p.Name.ToLower().Contains(searchLower) ||
+                    p.Description.ToLower().Contains(searchLower));
+            }
+
+            // Price range filter
+            if (minPrice.HasValue)
+            {
+                query = query.Where(p => p.Price >= minPrice.Value);
+            }
+            if (maxPrice.HasValue)
+            {
+                query = query.Where(p => p.Price <= maxPrice.Value);
+            }
+
+
+            // Count AFTER filtering but BEFORE pagination
+            var totalCount = await query.CountAsync();
 
             query = sort switch
             {
@@ -39,11 +69,9 @@ namespace ecomweb
                 _ => query.OrderBy(p => p.Price),
             };
 
-            
-
             var products = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
 
-            return new ProductsDto() { Products = products, TotalCount = query.Count() };
+            return new ProductsDto() { Products = products, TotalCount = totalCount };
         }
 
         // GET: api/Product/5
