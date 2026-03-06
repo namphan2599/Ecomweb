@@ -1,6 +1,9 @@
 using Bogus;
 using ecomweb.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using System;
+
 namespace Ecomweb.Data;
 
 public class EcomContext : DbContext
@@ -21,8 +24,6 @@ public class EcomContext : DbContext
         //modelBuilder.Entity<Product>().HasData(products);
 
 
-       
-
 
         modelBuilder.Entity<User>()
             .HasMany(e => e.Carts)
@@ -40,6 +41,18 @@ public class EcomContext : DbContext
             .HasOne(e => e.Product)
             .WithMany()
             .HasForeignKey(e => e.ProductId)
+            .IsRequired();
+
+        // Store monetary values as integer cents in the DB while keeping decimal on the entity.
+        var decimalToLongConverter = new ValueConverter<decimal, long>(
+            v => (long)Math.Round(v * 100m, MidpointRounding.AwayFromZero), // decimal dollars -> long cents
+            v => v / 100m                                                  // long cents -> decimal dollars
+        );
+
+        modelBuilder.Entity<Product>()
+            .Property(p => p.Price)
+            .HasConversion(decimalToLongConverter)
+            .HasColumnType("INTEGER")
             .IsRequired();
 
         base.OnModelCreating(modelBuilder);

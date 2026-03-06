@@ -13,4 +13,8 @@ public class Order
 
     public ICollection<OrderItems> OrderItems { get; set; } = new List<OrderItems>();
 
+    // Audit fields
+    public DateTime? UpdatedAt { get; set; }
+    public string? UpdatedBy { get; set; }
+
 }
